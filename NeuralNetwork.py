@@ -9,7 +9,7 @@ import os
 
 class myNeuralNetwork:
 
-  def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False):
+  def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False,momentum=0):
 
     self.learningRate = learningRate
     self.epoch = epoch
@@ -20,6 +20,7 @@ class myNeuralNetwork:
     self.lostFunction = lostFunction
     self.layers = []
     self.showProgress = showProgress
+    self.momentum = momentum
   
   def initializeWeights(self):
 
@@ -32,10 +33,8 @@ class myNeuralNetwork:
     
     self.weights.append(self.matrix)
     
-    for _ in range(self.layerNumber-1):
-        
+    for _ in range(self.layerNumber-1): #setting up the weights for the hidden layers
         self.matrix = np.zeros((self.neuronNumber,self.neuronNumber))
-        
         for i in range(self.neuronNumber):
             for j in range(self.neuronNumber):
                 self.matrix[i,j] = self.weightsInitialValue()
@@ -46,7 +45,6 @@ class myNeuralNetwork:
 
     for i in range(self.neuronNumber): # binary classification
       for j in range(2):
-
         self.matrix[i,j] = self.weightsInitialValue()
 
     self.weights.append(self.matrix)
@@ -64,9 +62,15 @@ class myNeuralNetwork:
           'training_acc':[]
       }
 
+    #Setting up a matrix for all delta weights from the previous iteration to calculate the momentum.
+    self.delta_weights_previous_iteration = []
+    self.delta_weights_previous_iteration.append(np.zeros((len(self.x[0]),self.neuronNumber)))
+    for _ in range(self.layerNumber-1): self.delta_weights_previous_iteration.append(np.zeros((self.neuronNumber,self.neuronNumber)))  
+    self.delta_weights_previous_iteration.append(np.zeros((self.neuronNumber,2)))
+
     for i in range(self.epoch):
 
-      prediction_training, prediction_validation ,test = [],[],[]
+      prediction_training, prediction_validation = [],[]
       x_train, x_validation, y_train, y_validation = train_test_split(self.x,self.y,test_size=validation_size)
       self.y_train = y_train
       
@@ -118,9 +122,6 @@ class myNeuralNetwork:
       
       for index,weight in enumerate(self.weights):
         if index>0: layer = [self.activeFunction(element) for element in np.dot(layer,weight)]
-      
-      #result_predict = np.dot(layer,self.weights[1])
-      #result_predict = [self.activeFunction(element) for element in result_predict]
 
       results.append(1) if layer[1]>layer[0] else results.append(0)
     
@@ -129,11 +130,13 @@ class myNeuralNetwork:
 
   def update_weight(self):
 
+    #Setting up a matrix for all deltas
     delta_matrix = []
     delta_matrix.append(np.zeros((len(self.x[0]),self.neuronNumber)))
     for _ in range(self.layerNumber-1): delta_matrix.append(np.zeros((self.neuronNumber,self.neuronNumber)))  
     delta_matrix.append(np.zeros((self.neuronNumber,2)))
     real_value = [0,1] if self.y_train[self.current_iteration] == 1 else [1,0]
+
 
     for index in range(len(self.weights)-1,-1,-1):
       
@@ -142,7 +145,6 @@ class myNeuralNetwork:
         for j in range(len(self.weights[index][i])):
 
           if index == (len(self.weights)-1): #Updating the last layer weights.
-
             delta = (self.layers[index+1][j]-real_value[j])*self.layers[index+1][j]*(1+self.layers[index+1][j])
             
           else: #Updating the layer weights left.
@@ -153,4 +155,7 @@ class myNeuralNetwork:
             delta = self.layers[index+1][j]*(1+self.layers[index+1][j])*sum_delta
             
           delta_matrix[index][i,j] = delta
-          self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i]
+          self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j]
+          self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
+          
+#https://optimization.cbe.cornell.edu/index.php?title=Momentum
