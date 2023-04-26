@@ -6,7 +6,6 @@ import numpy as np
 import math
 import os
 
-
 class myNeuralNetwork:
 
   def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False,momentum=0):
@@ -21,6 +20,7 @@ class myNeuralNetwork:
     self.layers = []
     self.showProgress = showProgress
     self.momentum = momentum
+    self.use_early_stopping = False
   
   def initializeWeights(self):
 
@@ -61,6 +61,7 @@ class myNeuralNetwork:
           'validation_acc':[],
           'training_acc':[]
       }
+    best_acc = 0
 
     #Setting up a matrix for all delta weights from the previous iteration to calculate the momentum.
     self.delta_weights_previous_iteration = []
@@ -88,7 +89,7 @@ class myNeuralNetwork:
         result = [self.activeFunction(element) for element in result]
         self.layers.append(result)
         
-        for layer_index in range(self.layerNumber-1):#check here
+        for layer_index in range(self.layerNumber-1):
             result = np.dot(result,self.weights[layer_index+1])
             result = [self.activeFunction(element) for element in result]
             self.layers.append(result)
@@ -105,10 +106,22 @@ class myNeuralNetwork:
 
       prediction_validation = self.predict(x_validation)
 
-      history['validation_acc'].append(accuracy_score(prediction_validation,y_validation))
-      history['training_acc'].append(accuracy_score(prediction_training,y_train))
+      current_validation_acc = accuracy_score(prediction_validation,y_validation)
+      current_training_acc = accuracy_score(prediction_training,y_train)
 
+      history['validation_acc'].append(current_validation_acc)
+      history['training_acc'].append(current_training_acc)
 
+      if self.use_early_stopping:
+        if current_validation_acc - self.e >= best_acc:
+          count_early_stopping = 0
+          best_acc = current_validation_acc
+        else:
+          count_early_stopping +=1
+          print(f"No improviment found {count_early_stopping}")
+          if count_early_stopping >=self.no_improvement_times:
+            return prediction_training,history
+          
     return prediction_training,history
     
 
@@ -126,7 +139,14 @@ class myNeuralNetwork:
       results.append(1) if layer[1]>layer[0] else results.append(0)
     
     return results
-    
+  
+  def set_early_stopping(self,early_stopping_config):
+
+    self.use_early_stopping = True
+    self.no_improvement_times = early_stopping_config['no_improvement_max']
+    self.e = early_stopping_config['e']
+
+    print(f"Early stopping activated with x = {early_stopping_config['no_improvement_max']} and e = {early_stopping_config['e']}")
 
   def update_weight(self):
 
@@ -136,7 +156,6 @@ class myNeuralNetwork:
     for _ in range(self.layerNumber-1): delta_matrix.append(np.zeros((self.neuronNumber,self.neuronNumber)))  
     delta_matrix.append(np.zeros((self.neuronNumber,2)))
     real_value = [0,1] if self.y_train[self.current_iteration] == 1 else [1,0]
-
 
     for index in range(len(self.weights)-1,-1,-1):
       
@@ -155,7 +174,7 @@ class myNeuralNetwork:
             delta = self.layers[index+1][j]*(1+self.layers[index+1][j])*sum_delta
             
           delta_matrix[index][i,j] = delta
-          self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j]
+          self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
           self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
           
 #https://optimization.cbe.cornell.edu/index.php?title=Momentum
