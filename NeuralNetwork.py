@@ -177,4 +177,45 @@ class myNeuralNetwork:
           self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
           self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
           
-#https://optimization.cbe.cornell.edu/index.php?title=Momentum
+class  normalization():
+  
+  def __init__(self,dataset):
+    
+    if not isinstance(dataset, np.ndarray): raise Exception("Dataset must be numpy type")
+        
+    self.dataset = dataset
+    self.max_array = []
+    self.min_array = []
+  
+  def fit(self):
+    
+    normalized_dataset = np.zeros(self.dataset.shape)
+    
+    for j in range(self.dataset.shape[1]):
+      
+      current_column = self.dataset[:,j]
+      column_min =  current_column.min()
+      column_max =  current_column.max()
+      
+      self.max_array.append(self.max_array)
+      self.min_array.append(self.min_array)
+      
+      for i,element in enumerate(current_column):
+        
+        normalized_dataset[i,j] = (element - column_min)/(column_max - column_min)
+    
+    return normalized_dataset
+  
+  def transform(self,dataset2):
+    
+    normalized_dataset2 = np.zeros(dataset2.shape)
+    
+    for j in range(dataset2.shape[1]):
+      
+      current_column = dataset2[:,j]
+      
+      for i,element in enumerate(current_column):
+        
+        normalized_dataset2[i,j] = (element - self.min_array[j])/(self.max_array[j]-self.min_array[j])
+        
+    return normalized_dataset2

@@ -6,13 +6,17 @@ from sklearn.metrics import accuracy_score,recall_score,precision_score
 import math
 import numpy as np
 from parameters import parameters,graph_options,early_stopping_config
-from NeuralNetwork import myNeuralNetwork as MNN
+from NeuralNetwork import myNeuralNetwork as MNN,normalization
 
 #x,y = make_classification(n_samples=3000,n_classes=2,n_features=5,random_state=27)
 x = [[np.random.uniform(0,50),np.random.uniform(0,50)] for tupl in range(5000)]
 y = [1 if element[0]>=20 and element[1]>=12 else 0 for element in x]
 
 x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.3)
+
+#normalize = normalization(np.matrix(x_train))
+#x_train = normalize.fit()
+#x_test = normalize.transform(np.matrix(x_test))
 
 print('-------Initializing the model-------')
 
@@ -48,9 +52,9 @@ if graph_options['hist']:
 
     for test in range(200):
 
-        x2 = [[np.random.uniform(0,50),np.random.uniform(0,50)] for _ in range(1000)]
-        y2 = [1 if element[0]>=20 and element[1]>=12 else 0 for element in x2]
-        #x2,y2 = make_classification(n_samples=500,n_classes=2,n_features=5,random_state=30)
+        #x2 = [[np.random.uniform(0,50),np.random.uniform(0,50)] for _ in range(1000)]
+        #y2 = [1 if element[0]>=20 and element[1]>=12 else 0 for element in x2]
+        x2,y2 = make_classification(n_samples=500,n_classes=2,n_features=5,random_state=27)
         prediction = model.predict(x2)
         final_result.append(accuracy_score(y2,prediction))
 

@@ -10,12 +10,12 @@ parameters = {
     'lostFunction':lambda y,y_hat: (y-y_hat)**2,
     'layerNumber':2,
     'showProgress':True,
-    'momentum':0
+    'momentum':0.4
 }
 
 graph_options = {
     'validation_x_traning':True,
-    'hist':True
+    'hist':False
 }
 
 early_stopping_config = {
