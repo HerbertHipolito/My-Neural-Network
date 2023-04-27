@@ -8,9 +8,9 @@ import numpy as np
 from parameters import parameters,graph_options,early_stopping_config
 from NeuralNetwork import myNeuralNetwork as MNN,normalization
 
-#x,y = make_classification(n_samples=3000,n_classes=2,n_features=5,random_state=27)
-x = [[np.random.uniform(0,50),np.random.uniform(0,50)] for tupl in range(5000)]
-y = [1 if element[0]>=20 and element[1]>=12 else 0 for element in x]
+x,y = make_classification(n_samples=5000,n_classes=2,n_features=5,random_state=27)
+#x = [[np.random.uniform(0,50),np.random.uniform(0,50)] for tupl in range(5000)]
+#y = [1 if element[0]>=20 and element[1]>=12 else 0 for element in x]
 
 x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.3)
 
@@ -23,6 +23,7 @@ print('-------Initializing the model-------')
 model = MNN(**parameters)
 model.trainingData(x_train,y_train)
 model.set_early_stopping(early_stopping_config)
+print(parameters)
 training_prediction,history = model.fit()  
 
 print('\n-------Performing the predictions-------\n')

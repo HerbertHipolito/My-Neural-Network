@@ -24,12 +24,24 @@ class myNeuralNetwork:
     self.use_early_stopping = False
     self.activeFunctionName = activeFunction
     
+    #if self.activeFunctionName == 'sigmoid': return self.layers[index+1][j]*(1+self.layers[index+1][j])
+    #if self.activeFunctionName == 'relu': return 1 if self.layers[index+1][j] >= 0 else 0
+    #if self.activeFunctionName == 'leaky_relu': return 1 if self.layers[index+1][j] >= 0 else 0.01
+    #if self.activeFunctionName == 'binary_step': return 0
+    #if self.activeFunctionName == 'soft_plus': return 1/(1+math.e**(self.layers[index+1][j]))
+    
     if activeFunction == "sigmoid":
       self.activeFunction = lambda x:1/(1+(math.e**(-x)))
+      self.derivateOfActiveFunction = lambda x:x*(1+x)
     elif activeFunction == "relu":
       self.activeFunction = lambda x:max(0,x)
+      self.derivateOfActiveFunction = lambda x:1 if x>=0 else 0
     elif activeFunction == "leaky_relu":
       self.activeFunction = lambda x:x if x>=0 else 0.01*x
+      self.derivateOfActiveFunction = lambda x: 1 if x>=0 else 0.01
+    elif activeFunction == "soft_plus":
+      self.activeFunction = lambda x: math.log(1+math.e**x)
+      self.derivateOfActiveFunction = lambda x: 1/(1+math.e**(x))
     else:
       raise Exception('Activation function not found')
       
@@ -73,6 +85,7 @@ class myNeuralNetwork:
           'training_acc':[]
       }
     best_acc = 0
+    best_weights = self.weights
 
     #Setting up a matrix for all delta weights from the previous iteration to calculate the momentum.
     self.delta_weights_previous_iteration = []
@@ -127,10 +140,12 @@ class myNeuralNetwork:
         if current_validation_acc - self.e >= best_acc:
           count_early_stopping = 0
           best_acc = current_validation_acc
+          best_weights = self.weights
         else:
           count_early_stopping +=1
           print(f"No improviment found {count_early_stopping}")
           if count_early_stopping >=self.no_improvement_times:
+            if not self.return_lastest_weights: self.weights = best_weights
             return prediction_training,history
           
     return prediction_training,history
@@ -156,6 +171,7 @@ class myNeuralNetwork:
     self.use_early_stopping = True
     self.no_improvement_times = early_stopping_config['no_improvement_max']
     self.e = early_stopping_config['e']
+    self.return_lastest_weights = early_stopping_config['return_lastest_weights']
 
     print(f"Early stopping activated with x = {early_stopping_config['no_improvement_max']} and e = {early_stopping_config['e']}")
 
@@ -175,28 +191,72 @@ class myNeuralNetwork:
         for j in range(len(self.weights[index][i])):
 
           if index == (len(self.weights)-1): #Updating the last layer weights.
-            delta = (self.layers[index+1][j]-real_value[j])*self.functionDerivate(index,j)
+            delta = (self.layers[index+1][j]-real_value[j])*self.derivateOfActiveFunction(self.layers[index+1][j])
             
           else: #Updating the layer weights left.
             sum_delta = 0
             for v,element in enumerate(delta_matrix[index+1][j]):
               sum_delta+=element*self.weights[index+1][j,v]
             
-            delta = self.functionDerivate(index,j)*sum_delta
+            delta = self.derivateOfActiveFunction(self.layers[index+1][j])*sum_delta
             
           delta_matrix[index][i,j] = delta
           self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
           self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
   
-  #https://en.wikipedia.org/wiki/Activation_function
   def functionDerivate(self,index,j):
     
     if self.activeFunctionName == 'sigmoid': return self.layers[index+1][j]*(1+self.layers[index+1][j])
     if self.activeFunctionName == 'relu': return 1 if self.layers[index+1][j] >= 0 else 0
     if self.activeFunctionName == 'leaky_relu': return 1 if self.layers[index+1][j] >= 0 else 0.01
+    if self.activeFunctionName == 'binary_step': return 0
+    if self.activeFunctionName == 'soft_plus': return 1/(1+math.e**(self.layers[index+1][j]))
     raise Exception('Active function name not found')
     
           
+class  normalization():
+  
+  def __init__(self,dataset):
+    
+    if not isinstance(dataset, np.ndarray): raise Exception("Dataset must be numpy type")
+        
+    self.dataset = dataset
+    self.max_array = []
+    self.min_array = []
+  
+  def fit(self):
+    
+    normalized_dataset = np.zeros(self.dataset.shape)
+    
+    for j in range(self.dataset.shape[1]):
+      
+      current_column = self.dataset[:,j]
+      column_min =  current_column.min()
+      column_max =  current_column.max()
+      
+      self.max_array.append(self.max_array)
+      self.min_array.append(self.min_array)
+      
+      for i,element in enumerate(current_column):
+        
+        normalized_dataset[i,j] = (element - column_min)/(column_max - column_min)
+    
+    return normalized_dataset
+  
+  def transform(self,dataset2):
+    
+    normalized_dataset2 = np.zeros(dataset2.shape)
+    
+    for j in range(dataset2.shape[1]):
+      
+      current_column = dataset2[:,j]
+      
+      for i,element in enumerate(current_column):
+        
+        normalized_dataset2[i,j] = (element - self.min_array[j])/(self.max_array[j]-self.min_array[j])
+        
+    return normalized_dataset2
+
 class  normalization():
   
   def __init__(self,dataset):
