@@ -52,9 +52,9 @@ if graph_options['hist']:
 
     for test in range(200):
 
-        #x2 = [[np.random.uniform(0,50),np.random.uniform(0,50)] for _ in range(1000)]
-        #y2 = [1 if element[0]>=20 and element[1]>=12 else 0 for element in x2]
-        x2,y2 = make_classification(n_samples=500,n_classes=2,n_features=5,random_state=27)
+        x2 = [[np.random.uniform(0,50),np.random.uniform(0,50)] for _ in range(1000)]
+        y2 = [1 if element[0]>=20 and element[1]>=12 else 0 for element in x2]
+        #x2,y2 = make_classification(n_samples=500,n_classes=2,n_features=5,random_state=27)
         prediction = model.predict(x2)
         final_result.append(accuracy_score(y2,prediction))
 

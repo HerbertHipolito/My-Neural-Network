@@ -6,6 +6,8 @@ import numpy as np
 import math
 import os
 
+# return the weights that obtained the best acc
+
 class myNeuralNetwork:
 
   def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False,momentum=0):
@@ -15,13 +17,22 @@ class myNeuralNetwork:
     self.neuronNumber = neuronNumber
     self.weightsInitialValue = weightsInitialValue
     self.layerNumber = layerNumber
-    self.activeFunction = activeFunction
     self.lostFunction = lostFunction
     self.layers = []
     self.showProgress = showProgress
     self.momentum = momentum
     self.use_early_stopping = False
-  
+    self.activeFunctionName = activeFunction
+    
+    if activeFunction == "sigmoid":
+      self.activeFunction = lambda x:1/(1+(math.e**(-x)))
+    elif activeFunction == "relu":
+      self.activeFunction = lambda x:max(0,x)
+    elif activeFunction == "leaky_relu":
+      self.activeFunction = lambda x:x if x>=0 else 0.01*x
+    else:
+      raise Exception('Activation function not found')
+      
   def initializeWeights(self):
 
     self.matrix = np.zeros((len(self.x[0]),self.neuronNumber))
@@ -164,18 +175,27 @@ class myNeuralNetwork:
         for j in range(len(self.weights[index][i])):
 
           if index == (len(self.weights)-1): #Updating the last layer weights.
-            delta = (self.layers[index+1][j]-real_value[j])*self.layers[index+1][j]*(1+self.layers[index+1][j])
+            delta = (self.layers[index+1][j]-real_value[j])*self.functionDerivate(index,j)
             
           else: #Updating the layer weights left.
             sum_delta = 0
             for v,element in enumerate(delta_matrix[index+1][j]):
               sum_delta+=element*self.weights[index+1][j,v]
             
-            delta = self.layers[index+1][j]*(1+self.layers[index+1][j])*sum_delta
+            delta = self.functionDerivate(index,j)*sum_delta
             
           delta_matrix[index][i,j] = delta
           self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
           self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
+  
+  #https://en.wikipedia.org/wiki/Activation_function
+  def functionDerivate(self,index,j):
+    
+    if self.activeFunctionName == 'sigmoid': return self.layers[index+1][j]*(1+self.layers[index+1][j])
+    if self.activeFunctionName == 'relu': return 1 if self.layers[index+1][j] >= 0 else 0
+    if self.activeFunctionName == 'leaky_relu': return 1 if self.layers[index+1][j] >= 0 else 0.01
+    raise Exception('Active function name not found')
+    
           
 class  normalization():
   
