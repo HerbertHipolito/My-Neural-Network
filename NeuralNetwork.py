@@ -1,6 +1,13 @@
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 
+import numpy as np
+import math
+import os
+
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+
 import pandas as pd
 import numpy as np
 import math
@@ -10,7 +17,7 @@ import os
 
 class myNeuralNetwork:
 
-  def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False,momentum=0):
+  def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False,momentum=0,regularization_l1=0,regularization_l2=0):
 
     self.learningRate = learningRate
     self.epoch = epoch
@@ -23,12 +30,8 @@ class myNeuralNetwork:
     self.momentum = momentum
     self.use_early_stopping = False
     self.activeFunctionName = activeFunction
-    
-    #if self.activeFunctionName == 'sigmoid': return self.layers[index+1][j]*(1+self.layers[index+1][j])
-    #if self.activeFunctionName == 'relu': return 1 if self.layers[index+1][j] >= 0 else 0
-    #if self.activeFunctionName == 'leaky_relu': return 1 if self.layers[index+1][j] >= 0 else 0.01
-    #if self.activeFunctionName == 'binary_step': return 0
-    #if self.activeFunctionName == 'soft_plus': return 1/(1+math.e**(self.layers[index+1][j]))
+    self.regularization_l1 = regularization_l1
+    self.regularization_l2 = regularization_l2
     
     if activeFunction == "sigmoid":
       self.activeFunction = lambda x:1/(1+(math.e**(-x)))
@@ -191,7 +194,9 @@ class myNeuralNetwork:
         for j in range(len(self.weights[index][i])):
 
           if index == (len(self.weights)-1): #Updating the last layer weights.
-            delta = (self.layers[index+1][j]-real_value[j])*self.derivateOfActiveFunction(self.layers[index+1][j])
+            l1 = self.regularization_l1*np.sign(self.weights[index][i,j])
+            l2 = 2*self.regularization_l2*self.weights[index][i,j]
+            delta = (self.layers[index+1][j]-real_value[j])*self.derivateOfActiveFunction(self.layers[index+1][j]) + l1 + l2 # l1 and l2 regularization added
             
           else: #Updating the layer weights left.
             sum_delta = 0
@@ -203,60 +208,9 @@ class myNeuralNetwork:
           delta_matrix[index][i,j] = delta
           self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
           self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
-  
-  def functionDerivate(self,index,j):
-    
-    if self.activeFunctionName == 'sigmoid': return self.layers[index+1][j]*(1+self.layers[index+1][j])
-    if self.activeFunctionName == 'relu': return 1 if self.layers[index+1][j] >= 0 else 0
-    if self.activeFunctionName == 'leaky_relu': return 1 if self.layers[index+1][j] >= 0 else 0.01
-    if self.activeFunctionName == 'binary_step': return 0
-    if self.activeFunctionName == 'soft_plus': return 1/(1+math.e**(self.layers[index+1][j]))
-    raise Exception('Active function name not found')
+
     
           
-class  normalization():
-  
-  def __init__(self,dataset):
-    
-    if not isinstance(dataset, np.ndarray): raise Exception("Dataset must be numpy type")
-        
-    self.dataset = dataset
-    self.max_array = []
-    self.min_array = []
-  
-  def fit(self):
-    
-    normalized_dataset = np.zeros(self.dataset.shape)
-    
-    for j in range(self.dataset.shape[1]):
-      
-      current_column = self.dataset[:,j]
-      column_min =  current_column.min()
-      column_max =  current_column.max()
-      
-      self.max_array.append(self.max_array)
-      self.min_array.append(self.min_array)
-      
-      for i,element in enumerate(current_column):
-        
-        normalized_dataset[i,j] = (element - column_min)/(column_max - column_min)
-    
-    return normalized_dataset
-  
-  def transform(self,dataset2):
-    
-    normalized_dataset2 = np.zeros(dataset2.shape)
-    
-    for j in range(dataset2.shape[1]):
-      
-      current_column = dataset2[:,j]
-      
-      for i,element in enumerate(current_column):
-        
-        normalized_dataset2[i,j] = (element - self.min_array[j])/(self.max_array[j]-self.min_array[j])
-        
-    return normalized_dataset2
-
 class  normalization():
   
   def __init__(self,dataset):
