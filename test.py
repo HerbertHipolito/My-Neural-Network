@@ -3,14 +3,13 @@ from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score,recall_score,precision_score,f1_score
 
-import math
 import numpy as np
 from parameters import parameters,graph_options,early_stopping_config
 from NeuralNetwork import myNeuralNetwork as MNN
 
 x_total,y_total = make_classification(n_samples=60000,n_classes=2,n_features=5,random_state=36)
-x = x_total[0:5000,:]
-y = y_total[0:5000]
+x = x_total[0:10000,:]
+y = y_total[0:10000]
 
 #x = [[np.random.uniform(0,50),np.random.uniform(0,50)] for tupl in range(5000)]
 #y = [1 if element[0]>=20 and element[1]>=12 else 0 for element in x]

@@ -5,19 +5,16 @@ import numpy as np
 import math
 import os
 
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
 
 import pandas as pd
 import numpy as np
 import math
 import os
 
-# return the weights that obtained the best acc
 
 class myNeuralNetwork:
 
-  def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False,momentum=0,regularization_l1=0,regularization_l2=0):
+  def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False,momentum=0,regularization_l1=0,regularization_l2=0,show_validation_traning_acc=False):
 
     self.learningRate = learningRate
     self.epoch = epoch
@@ -32,7 +29,8 @@ class myNeuralNetwork:
     self.activeFunctionName = activeFunction
     self.regularization_l1 = regularization_l1
     self.regularization_l2 = regularization_l2
-    
+    self.show_validation_traning_acc = show_validation_traning_acc
+
     if activeFunction == "sigmoid":
       self.activeFunction = lambda x:1/(1+(math.e**(-x)))
       self.derivateOfActiveFunction = lambda x:x*(1+x)
@@ -139,6 +137,10 @@ class myNeuralNetwork:
       history['validation_acc'].append(current_validation_acc)
       history['training_acc'].append(current_training_acc)
 
+      if self.show_validation_traning_acc:
+        print(current_validation_acc)
+        print(current_training_acc)
+
       if self.use_early_stopping:
         if current_validation_acc - self.e >= best_acc:
           count_early_stopping = 0
@@ -146,13 +148,27 @@ class myNeuralNetwork:
           best_weights = self.weights
         else:
           count_early_stopping +=1
-          print(f"No improviment found {count_early_stopping}")
+          if self.show_no_improviment_message:  print(f"No improviment found {count_early_stopping}")
           if count_early_stopping >=self.no_improvement_times:
             if not self.return_lastest_weights: self.weights = best_weights
             return prediction_training,history
           
     return prediction_training,history
+ 
+
+  def early_stopping(self,current_validation_acc,best_acc): #finish this method
     
+    if current_validation_acc - self.e >= best_acc:
+      count_early_stopping = 0
+      best_acc = current_validation_acc
+      best_weights = self.weights
+    else:
+      count_early_stopping +=1
+      if self.show_no_improviment_message:  print(f"No improviment found {count_early_stopping}")
+      if count_early_stopping >=self.no_improvement_times:
+        if not self.return_lastest_weights: self.weights = best_weights
+        return prediction_training,history
+   
 
   def predict(self,to_predict):
 
@@ -175,6 +191,7 @@ class myNeuralNetwork:
     self.no_improvement_times = early_stopping_config['no_improvement_max']
     self.e = early_stopping_config['e']
     self.return_lastest_weights = early_stopping_config['return_lastest_weights']
+    self.show_no_improviment_message =  early_stopping_config['show_no_improviment_message'] 
 
     print(f"Early stopping activated with x = {early_stopping_config['no_improvement_max']} and e = {early_stopping_config['e']}")
 
@@ -208,7 +225,6 @@ class myNeuralNetwork:
           delta_matrix[index][i,j] = delta
           self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
           self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
-
     
           
 class  normalization():
