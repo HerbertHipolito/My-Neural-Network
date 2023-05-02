@@ -48,7 +48,7 @@ for index,simulation in enumerate(list(ParameterGrid(hyperparameters))):
         'index':index
     }
 
-    plt.title('Simu_'+str(index)+' momen='+str(simulation['momentum'])+' L1='+str(simulation['regularization_l1'])+' L2='+str(simulation['regularization_l2'])+' N.Number='+str(simulation['neuronNumber'])+'N.Layer='+str(simulation['layerNumber'])+str(simulation['learningRate']))
+    plt.title('Simu_'+str(index)+' momen='+str(simulation['momentum'])+' L1='+str(simulation['regularization_l1'])+' L2='+str(simulation['regularization_l2'])+' N.Number='+str(simulation['neuronNumber'])+'N.Layer='+str(simulation['layerNumber'])+'L.rate'+str(simulation['learningRate']))
     plt.plot(history['validation_acc'],label='validation')
     plt.plot(history['training_acc'],label='training')
     plt.ylabel('Accuracy')
