@@ -26,7 +26,7 @@ hyperparameters = {
     'layerNumber':[2,3],
     'showProgress':[True],
     'regularization_l1':[0],
-    'regularization_l2':[0,0.4],
+    'regularization_l2':[0],
     'momentum':[0,0.4],
     'show_validation_traning_acc':[False]
 }
