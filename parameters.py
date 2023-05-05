@@ -23,11 +23,11 @@ hyperparameters = {
     'weightsInitialValue':[lambda x=None:np.random.normal(loc=0,scale=0.05)],
     'activeFunction':['relu'],
     'lostFunction':[lambda y,y_hat: (y-y_hat)**2], # this parameter has not been used. it just let you know what lost function was implemented.
-    'layerNumber':[2,3],
+    'layerNumber':[2],
     'showProgress':[True],
     'regularization_l1':[0],
     'regularization_l2':[0],
-    'momentum':[0,0.4],
+    'momentum':[0,0.4,0.8],
     'show_validation_traning_acc':[False]
 }
 

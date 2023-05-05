@@ -82,8 +82,10 @@ for index,simulation in enumerate(list(ParameterGrid(hyperparameters))):
         },
         'training_acc':history['training_acc'],
         'validation_acc':history['validation_acc'],
+        'sklearn_validation_acc':sklearn_model.validation_scores_,
         'sklearn_time':sklearn_time,
         'my_mlp_time':my_mlp_time,
+        'time_difference':sklearn_time-my_mlp_time,
         'index':index
     }
 
