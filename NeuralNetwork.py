@@ -5,12 +5,6 @@ import numpy as np
 import math
 import os
 
-import pandas as pd
-import numpy as np
-import math
-import os
-
-
 class myNeuralNetwork:
 
   def __init__(self,learningRate,epoch,neuronNumber,weightsInitialValue,activeFunction,lostFunction,layerNumber=1,showProgress=False,momentum=0,regularization_l1=0,regularization_l2=0,show_validation_traning_acc=False):
@@ -113,15 +107,15 @@ class myNeuralNetwork:
         self.layers.append(x_train[j])
 
         result = [self.activeFunction(element+self.bias[0][i]) for i,element in enumerate(np.dot(x_train[j],self.weights[0]))]
-        self.layers.append(result)
+        self.layers.append(np.array(result))
         
         for layer_index in range(self.layerNumber-1):
             result = [self.activeFunction(element+self.bias[layer_index+1][i]) for i,element in enumerate(np.dot(result,self.weights[layer_index+1]))]
-            self.layers.append(result)
+            self.layers.append(np.array(result))
 
         self.finalResult = [self.activeFunction(element+self.bias[self.layerNumber][i]) for i,element in enumerate(np.dot(result,self.weights[self.layerNumber]))]
 
-        self.layers.append(self.finalResult)
+        self.layers.append(np.array(self.finalResult))
 
         #prediction_training.append(1) if self.finalResult[1]>self.finalResult[0] else prediction_training.append(0)
         if self.finalResult[1]>self.finalResult[0]: prediction_training[j] = 1
@@ -182,39 +176,35 @@ class myNeuralNetwork:
     print(f"Early stopping activated with x = {early_stopping_config['no_improvement_max']} and e = {early_stopping_config['e']}")
 
   def update_weight(self):
-
+ 
     #Setting up a matrix for all deltas
-    delta_matrix = []
-    delta_matrix.append(np.zeros((self.columnNumber,self.neuronNumber)))
-    for _ in range(self.layerNumber-1): delta_matrix.append(np.zeros((self.neuronNumber,self.neuronNumber)))  
-    delta_matrix.append(np.zeros((self.neuronNumber,2)))
+    delta_matrix = [np.zeros((self.columnNumber,self.neuronNumber))] + [np.zeros((self.neuronNumber,self.neuronNumber)) for _ in range(self.layerNumber-1)] + [np.zeros((self.neuronNumber,2))]
     real_value = [0,1] if self.y_train[self.current_iteration] == 1 else [1,0]
-    
+ 
     weight_layer = len(self.weights) - 1
-
+ 
     for index in range(weight_layer,-1,-1):
-      
+ 
       for i,row_weight in enumerate(self.weights[index]):
-
+ 
         len_weights = len(self.weights[index][i])
-
-        for j in range(len_weights): 
-
+ 
+        for j in range(len_weights):
+ 
           if index == (weight_layer): #Updating the last layer weights.
             l1 = self.regularization_l1*np.sign(self.weights[index][i,j])
             l2 = 2*self.regularization_l2*self.weights[index][i,j]
             delta = (self.layers[index+1][j]-real_value[j])*self.derivateOfActiveFunction(self.layers[index+1][j]) + l1 + l2 # l1 and l2 regularization added
-            
+ 
           else: #Updating the layer weights left.
             sum_delta = 0
             for v,element in enumerate(delta_matrix[index+1][j]):
               sum_delta+=element*self.weights[index+1][j,v]
-            
+ 
             delta = self.derivateOfActiveFunction(self.layers[index+1][j])*sum_delta
-            
           delta_matrix[index][i,j] = delta
-          self.weights[index][i,j] -= self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
+          self.weights[index][i,j] -= (1-self.momentum)*self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
+          self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
           self.bias[index][j] -= self.learningRate*delta #updating Bias
-          
-          self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i] 
 
+    

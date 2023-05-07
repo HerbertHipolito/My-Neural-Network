@@ -23,7 +23,7 @@ for index,simulation in enumerate(list(ParameterGrid(hyperparameters))):
 
     start = time.time()
 
-    sklearn_model = MLPClassifier(solver='sgd',nesterovs_momentum=False,hidden_layer_sizes=[simulation['neuronNumber'] for _ in range(simulation['layerNumber'])],power_t=0,momentum=simulation['momentum'],beta_1=0,beta_2=0,batch_size=1,early_stopping=True,validation_fraction=0.3,alpha=0,verbose=True).fit(x_train,y_train)
+    sklearn_model = MLPClassifier(solver='sgd',nesterovs_momentum=False,hidden_layer_sizes=[simulation['neuronNumber'] for _ in range(simulation['layerNumber'])],power_t=0,momentum=simulation['momentum'],beta_1=0,beta_2=0,batch_size=1,early_stopping=True,validation_fraction=0.1,alpha=simulation['regularization_l2'],verbose=True).fit(x_train,y_train)
     y_predicted_sklearn = sklearn_model.predict(x_test) 
 
     sklearn_time = time.time() - start
@@ -89,7 +89,7 @@ for index,simulation in enumerate(list(ParameterGrid(hyperparameters))):
         'index':index
     }
 
-    plt.title('Sim_'+str(index)+' momen='+str(simulation['momentum'])+' L1='+str(simulation['regularization_l1'])+' L2='+str(simulation['regularization_l2'])+' N.Number='+str(simulation['neuronNumber'])+'N.Layer='+str(simulation['layerNumber'])+'L.rate='+str(simulation['learningRate']))
+    plt.title('Sim_'+str(index)+' momen='+str(simulation['momentum'])+' L1='+str(simulation['regularization_l1'])+' L2='+str(simulation['regularization_l2'])+' N.Number='+str(simulation['neuronNumber'])+' N.Layer='+str(simulation['layerNumber'])+' L.rate='+str(simulation['learningRate']))
     plt.plot(history['validation_acc'],label='validation')
     plt.plot(history['training_acc'],label='training')
     plt.plot(sklearn_model.validation_scores_,label='sklearn Validation')
