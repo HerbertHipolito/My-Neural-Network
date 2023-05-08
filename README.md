@@ -15,3 +15,5 @@ Unfortunately, the comparisons are not totally fair because I did not implement 
 
 # Results in test dataset
 
+The dataset was generated from sklearn.datasets.make_classification to train and test the models. 
+It was selected 5 features (x) and 2 classes (y) with 7500 samples.

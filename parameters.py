@@ -8,7 +8,7 @@ parameters = { # parameters for only one test
     'activeFunction':'relu',
     'weightsInitialValue':lambda x=None:np.random.normal(loc=0,scale=0.05),
     'lostFunction':lambda y,y_hat: (y-y_hat)**2, # this parameter has not been used. it just let you know what lost function was implemented.
-    'layerNumber':1,
+    'layerNumber':2,
     'showProgress':True,
     'momentum':0.4,
     'regularization_l1':0,
@@ -19,7 +19,7 @@ parameters = { # parameters for only one test
 hyperparameters = {
     'epoch':[200],
     'learningRate':[0.001],
-    'neuronNumber':[20,25],
+    'neuronNumber':[15,20,25,30],
     'weightsInitialValue':[lambda x=None:np.random.normal(loc=0,scale=0.05)],
     'activeFunction':['relu'],
     'lostFunction':[lambda y,y_hat: (y-y_hat)**2], # this parameter has not been used. it just let you know what lost function was implemented.
@@ -27,7 +27,7 @@ hyperparameters = {
     'showProgress':[True],
     'regularization_l1':[0],
     'regularization_l2':[0],
-    'momentum':[0,0.4,0.8],
+    'momentum':[0],
     'show_validation_traning_acc':[False]
 }
 
