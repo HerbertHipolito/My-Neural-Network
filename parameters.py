@@ -10,7 +10,7 @@ parameters = { # parameters for only one test
     'lostFunction':lambda y,y_hat: (y-y_hat)**2, # this parameter has not been used. it just let you know what lost function was implemented.
     'layerNumber':2,
     'showProgress':True,
-    'momentum':0.4,
+    'momentum':0,
     'regularization_l1':0,
     'regularization_l2':0,
     'show_validation_traning_acc':True
@@ -27,7 +27,7 @@ hyperparameters = {
     'showProgress':[True],
     'regularization_l1':[0],
     'regularization_l2':[0],
-    'momentum':[0],
+    'momentum':[0,0.4,0.8],
     'show_validation_traning_acc':[False]
 }
 

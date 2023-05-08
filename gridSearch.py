@@ -11,7 +11,7 @@ import json
 import matplotlib.pyplot as plt
 import time
 
-x,y = make_classification(n_samples=7500,n_classes=2,n_features=5,random_state=36)
+x,y = make_classification(n_samples=10000,n_classes=2,n_features=5,random_state=36)
 x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.3)
 results = dict()
 

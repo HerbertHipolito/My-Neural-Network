@@ -121,7 +121,7 @@ class myNeuralNetwork:
         if self.finalResult[1]>self.finalResult[0]: prediction_training[j] = 1
 
         self.current_iteration = j
-        self.update_weight_more_optimized()
+        self.update_weight()
 
       prediction_validation = self.predict(x_validation)
 
@@ -179,65 +179,8 @@ class myNeuralNetwork:
  
     #Setting up a matrix for all deltas
     delta_matrix = [np.zeros((self.columnNumber,self.neuronNumber))] + [np.zeros((self.neuronNumber,self.neuronNumber)) for _ in range(self.layerNumber-1)] + [np.zeros((self.neuronNumber,2))]
-    real_value = [0,1] if self.y_train[self.current_iteration] == 1 else [1,0]
- 
-    weight_layer = len(self.weights) - 1
- 
-    for index in range(weight_layer,-1,-1):
- 
-      for i,row_weight in enumerate(self.weights[index]):
- 
-        len_weights = len(self.weights[index][i])
- 
-        for j in range(len_weights):
- 
-          if index == (weight_layer): #Updating the last layer weights.
-            l1 = self.regularization_l1*np.sign(self.weights[index][i,j])
-            l2 = 2*self.regularization_l2*self.weights[index][i,j]
-            delta = (self.layers[index+1][j]-real_value[j])*self.derivateOfActiveFunction(self.layers[index+1][j]) + l1 + l2 # l1 and l2 regularization added
- 
-          else: #Updating the layer weights left.
-            sum_delta = np.dot(delta_matrix[index+1][j],self.weights[index+1][j])
-            #for v,element in enumerate(delta_matrix[index+1][j]):
-            #  sum_delta+=element*self.weights[index+1][j,v]
-            
-            delta = self.derivateOfActiveFunction(self.layers[index+1][j])*sum_delta
-          delta_matrix[index][i,j] = delta
-          self.weights[index][i,j] -= (1-self.momentum)*self.learningRate*delta*self.layers[index][i] + self.momentum*self.delta_weights_previous_iteration[index][i,j] # momentum added
-          self.delta_weights_previous_iteration[index][i,j] = self.learningRate*delta*self.layers[index][i]
-          self.bias[index][j] -= self.learningRate*delta #updating Bias
- 
-  def update_weight_optimized(self):
- 
-    #Setting up a matrix for all deltas
-    delta_matrix = [np.zeros((self.columnNumber,self.neuronNumber))] + [np.zeros((self.neuronNumber,self.neuronNumber)) for _ in range(self.layerNumber-1)] + [np.zeros((self.neuronNumber,2))]
     real_value = np.array([0,1]) if self.y_train[self.current_iteration] == 1 else np.array([1,0])
- 
-    weight_layer = len(self.weights) - 1
- 
-    for index in range(weight_layer,-1,-1):
- 
-      for i,row_weight in enumerate(self.weights[index]):
- 
-        len_weights = len(self.weights[index][i])
- 
-        if index == (len_weights):    
-            deltas = np.array((self.layers[index+1]-real_value)*self.derivateOfActiveFunction(self.layers[index+1]))
-        else:
-            sum_deltas = np.dot(delta_matrix[index+1],self.weights[index+1].T)
-            deltas = self.derivateOfActiveFunction(self.layers[index+1])*sum_deltas[i]
-
-        delta_matrix[index][i] = deltas
-        self.weights[index][i] -= self.learningRate*deltas*self.layers[index][i] 
-        self.delta_weights_previous_iteration[index][i] = self.learningRate*deltas*self.layers[index][i]
-        self.bias[index] -= self.learningRate*deltas #updating Bias
-
-  def update_weight_more_optimized(self):
- 
-    #Setting up a matrix for all deltas
-    delta_matrix = [np.zeros((self.columnNumber,self.neuronNumber))] + [np.zeros((self.neuronNumber,self.neuronNumber)) for _ in range(self.layerNumber-1)] + [np.zeros((self.neuronNumber,2))]
-    real_value = np.array([0,1]) if self.y_train[self.current_iteration] == 1 else np.array([1,0])
- 
+    
     weight_layer = len(self.weights) - 1
     
     for index in range(weight_layer,-1,-1):
@@ -249,6 +192,9 @@ class myNeuralNetwork:
           deltas = np.array(self.derivateOfActiveFunction(self.layers[index+1])*sum_deltas)
       
       delta_matrix[index] = deltas
-      self.weights[index] -= self.learningRate*np.outer(self.layers[index],deltas)
-      self.delta_weights_previous_iteration[index] = self.weights[index]
+      if self.momentum != 0:
+          self.weights[index] -= (1-self.momentum)*self.learningRate*np.outer(self.layers[index],deltas) + self.momentum*self.delta_weights_previous_iteration[index]
+          self.delta_weights_previous_iteration[index] = self.learningRate*np.outer(self.layers[index],deltas)
+      else:
+          self.weights[index] -= self.learningRate*np.outer(self.layers[index],deltas)  
       self.bias[index] -= self.learningRate*deltas #updating Bias
