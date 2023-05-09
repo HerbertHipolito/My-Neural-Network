@@ -46,7 +46,7 @@ It carried out 24 simulations (GridSearch) according to the hyperparameters. The
 | 22         | 0.9530   | 0.9308    | 0.9733 | 0.9516 |
 | 23         | 0.9533   | 0.9315    | 0.9733 | 0.9519 | 
 
-Average difference between the my MLP and Sklearn MLP in relation the 4 metrics.
+The Average difference between my MLP and Sklearn MLP in relation to the 4 metrics.
 
 |         | acc        | precision  | recall     | f1         |
 | ------- | ----------| ----------| ----------| ----------|
