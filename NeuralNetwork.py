@@ -27,16 +27,16 @@ class myNeuralNetwork:
 
     if activeFunction == "sigmoid":
       self.activeFunction = lambda x:1/(1+(math.e**(-x)))
-      self.derivateOfActiveFunction = lambda x:x*(1+x)
+      self.derivateOfActiveFunction = lambda x:np.array([number*(1+number) for number in x])
     elif activeFunction == "relu":
       self.activeFunction = lambda x:max(0,x)
       self.derivateOfActiveFunction = lambda x:np.array([1 if number>=0 else 0 for number in x])
     elif activeFunction == "leaky_relu":
       self.activeFunction = lambda x:x if x>=0 else 0.01*x
-      self.derivateOfActiveFunction = lambda x: 1 if x>=0 else 0.01
+      self.derivateOfActiveFunction = lambda x:np.array([1 if number>=0 else 0.01 for number in x])
     elif activeFunction == "soft_plus":
       self.activeFunction = lambda x: math.log(1+math.e**x)
-      self.derivateOfActiveFunction = lambda x: 1/(1+math.e**(x))
+      self.derivateOfActiveFunction = lambda x:np.array([1/(1+math.e**(number)) for number in x])
     else:
       raise Exception('Activation function not found')
       
