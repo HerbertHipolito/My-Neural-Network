@@ -31,10 +31,10 @@ for index,simulation in enumerate(list(ParameterGrid(hyperparameters))):
     print(sklearn_model.validation_scores_)
     print(f'Sklearn mlp used {sklearn_time} of time')
 
-    acc_sklearn = accuracy_score(y_predicted_sklearn,y_test)
-    recall_sklearn = recall_score(y_predicted_sklearn,y_test)
-    precision_sklearn = precision_score(y_predicted_sklearn,y_test)
-    f1_sklearn = f1_score(y_predicted_sklearn,y_test)
+    acc_sklearn = accuracy_score(y_test,y_predicted_sklearn)
+    recall_sklearn = recall_score(y_test,y_predicted_sklearn)
+    precision_sklearn = precision_score(y_test,y_predicted_sklearn)
+    f1_sklearn = f1_score(y_test,y_predicted_sklearn)
 
     print('Acc:'+str(round(acc_sklearn ,4)))
     print('Recall: '+str(round(recall_sklearn,4)))
@@ -54,10 +54,10 @@ for index,simulation in enumerate(list(ParameterGrid(hyperparameters))):
 
     my_mlp_time = time.time() - start
 
-    acc = round(accuracy_score(y_predicted,y_test),4)
-    recall = round(recall_score(y_predicted,y_test),4)
-    precision = round(precision_score(y_predicted,y_test),4)
-    f1 = round(f1_score(y_predicted,y_test),4)
+    acc = round(accuracy_score(y_test,y_predicted),4)
+    recall = round(recall_score(y_test,y_predicted),4)
+    precision = round(precision_score(y_test,y_predicted),4)
+    f1 = round(f1_score(y_test,y_predicted),4)
 
     print('Acc:'+str(acc))
     print('Recall: '+str(recall))
@@ -89,7 +89,7 @@ for index,simulation in enumerate(list(ParameterGrid(hyperparameters))):
         'index':index
     }
 
-    plt.title('Sim_'+str(index)+' momen='+str(simulation['momentum'])+' L1='+str(simulation['regularization_l1'])+' L2='+str(simulation['regularization_l2'])+' N.Number='+str(simulation['neuronNumber'])+' N.Layer='+str(simulation['layerNumber'])+' L.rate='+str(simulation['learningRate']))
+    plt.title('Sim_'+str(index)+' momen='+str(simulation['momentum'])+' act. func.: '+str(simulation['activeFunction'])+' N.Number='+str(simulation['neuronNumber'])+' N.Layer='+str(simulation['layerNumber'])+' L.rate='+str(simulation['learningRate']))
     plt.plot(history['validation_acc'],label='validation')
     plt.plot(history['training_acc'],label='training')
     plt.plot(sklearn_model.validation_scores_,label='sklearn Validation')
